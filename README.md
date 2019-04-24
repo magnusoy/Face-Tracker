@@ -2,7 +2,7 @@
 
 This program utilize a Raspberry Pi and a Arduino for face tracking.
 
-It does so by using the Raspi-Cam and a two servoes.
+It does so by using the Raspi-Cam for face detection and two servoes for moving in the x and y plane.
 
 
 ## Installing
@@ -46,8 +46,7 @@ Then change the port in the Python script.
 
 ```bash
    cd ~
-   cd Face-Tracker/src
-   sudo nano app.py
+   sudo nano Face-Tracker/src/app.py
 ```
 Press CTRL + O and then ENTER to save.
 
