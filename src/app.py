@@ -28,6 +28,7 @@ if __name__ == "__main__":
         face_coordinates = eyes.detectFace()
         x = translate(face_coordinates[0], 0, 640, 0, 180)
         y = translate(face_coordinates[1], 0, 480, 50, 110)
-        servo.turnXAxis(x)
-        servo.turnYAxis(y)
+        if x > 0:
+            servo.turnXAxis(x)
+            servo.turnYAxis(y)
         

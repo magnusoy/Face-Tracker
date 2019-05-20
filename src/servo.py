@@ -9,7 +9,9 @@ class Servo(object):
         self.kit = ServoKit(channels=channels)
     
     def turnYAxis(self, position):
-        self.kit.servo[0].angle(position)
+        self.kit.servo[0].angle = position
     
     def turnXAxis(self, position):
-        self.kit.servo[1].angle(position)
+        self.kit.servo[1].angle = position
+
+

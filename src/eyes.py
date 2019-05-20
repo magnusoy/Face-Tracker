@@ -23,10 +23,15 @@ class Eyes(object):
         ret, frame = self.cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
+        
         if len(faces) > 0:
             face = faces[0]
-            center = ( (face[0] + face[2]) / 2, (face[1] + face[3]) / 2)
-            return center
+            for (x, y, w, h) in faces:
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            center = ((face[0] + face[1]) / 2, (face[1] + face[3]) / 2)
+            #cv2.circle(frame, (int(center[0]), int(center[1])), 3, (0, 0, 255), -3)
+            #return center
+        cv2.imshow("preview", frame)
         return 0, 0
     
     def close(self):
@@ -36,10 +41,16 @@ class Eyes(object):
         self.cap.release()
         cv2.destroyAllWindows()
 
+    def showFrame(self):
+        ret, frame = self.cap.read()
+        cv2.imshow("Frame", frame)
 
-if __name__ == "__main__":
-    eyes = Eyes()
 
-    while True:
-        face = eyes.detectFace()
-        print(face)
+eyes = Eyes()
+
+while True:
+    faces = eyes.detectFace()
+    key = cv2.waitKey(20)
+    if key == 27: # exit on ESC
+        break
+    
