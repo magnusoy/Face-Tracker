@@ -5,15 +5,16 @@
 docstring
 """
 
-from serialhandler import SerialCommunication
+from servo import Servo
 from eyes import Eyes
+from pid import PID
 
-arduino = SerialCommunincation("COM3", 9600)
 eyes = Eyes()
+servo = Servo()
+pidX = PID(1.0, 0.0, 0.0)
+
+running = True
 
 if __name__ == "__main__":
-    while(arduino.isConnected()):
+    while(running):
         face_coordinates = eyes.detectFace()
-        data = ','.join(map(str, face_coordinates))
-        arduino.sendOutputStream(data)
-

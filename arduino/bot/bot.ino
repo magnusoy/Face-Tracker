@@ -2,7 +2,7 @@
      This is the camera controller for the Shelf-Bot.
 */
 
-#include <PID_v1.h>
+#include <PID.h>
 #include <Servo.h>
 
 // Defining servos
@@ -26,22 +26,22 @@ char receivedChars[numChars]; // An array to store the received data
 
 // Variables holding buttonvalues
 const byte numCoordinates = 2;
-int coordinates[numCoordinates] = {0, 0};
+double coordinates[numCoordinates] = {0.0, 0.0};
 
 // PID Controller terms
 double kp = 4.0; double ki = 0.0; double kd = 0.0;
 
 // PID limitations
-#define PID_OUTPUT_LOW 0
-#define PID_OUTPUT_HIGH 180
+#define PID_OUTPUT_LOW 60
+#define PID_OUTPUT_HIGH 120
 
 // PID Controller X
 double currentX = 0.0; double setX = 320.0; double outputX = 0.0;
-PID pidX(&currentX, &setX, &outputX, kp, ki, kd, DIRECT);
+PID pidX(kp, ki, kd, DIRECT);
 
 // PID Controller Y
 double currentY = 0.0; double setY = 240.0; double outputY = 0.0;
-PID pidY(&currentY, &setY, &outputY, kp, ki, kd, DIRECT);
+PID pidY(kp, ki, kd, DIRECT);
 
 void setup() {
   // Start Serial for raspberry communication
@@ -51,15 +51,13 @@ void setup() {
   servoX.attach(9);
   servoY.attach(6);
 
-  // PID controller configurations
-  pidX.SetMode(AUTOMATIC);
-  pidY.SetMode(AUTOMATIC);
+  pidX.setUpdateTime(100);
+  pidY.setUpdateTime(100);
+  pidX.setOutputOffset(90);
+  pidY.setOutputOffset(90);
 
-  pidX.SetSampleTime(50);
-  pidY.SetSampleTime(50);
-
-  pidX.SetOutputLimits(PID_OUTPUT_LOW, PID_OUTPUT_HIGH);
-  pidY.SetOutputLimits(PID_OUTPUT_LOW, PID_OUTPUT_HIGH);
+  pidX.setOutputLimits(PID_OUTPUT_LOW, PID_OUTPUT_HIGH);
+  pidY.setOutputLimits(PID_OUTPUT_LOW, PID_OUTPUT_HIGH);
 }
 
 void loop() {
@@ -72,7 +70,7 @@ void loop() {
 
     case S_INIT:
       if (currentX == 0) {
-        int timeDelay = random(100, 600);
+        int timeDelay = random(1000, 5000);
         startTimer(timeDelay);
         changeState(S_SEARCHING);
       }
@@ -83,9 +81,9 @@ void loop() {
       break;
 
     case S_SEARCHING:
-      if ( timerHasExpired()) {
-        moveServoRandomly(servoX, outputX);
-        moveServoRandomly(servoY, outputY);
+      if (timerHasExpired()) {
+        //moveServoRandomly(servoX, outputX);
+        //moveServoRandomly(servoY, outputY);
         changeState(S_INIT);
       }
 
@@ -96,17 +94,13 @@ void loop() {
       break;
 
     case S_FOLLOWING:
-      boolean computed = pidX.Compute();
-      pidY.Compute();
-      if (computed) {
-        servoX.write(outputX);
-        servoY.write(outputY);
-      }
-
+      outputX = pidX.compute(currentX, setX);
+      outputY = pidY.compute(currentY, setY);
+      servoX.write(outputX);
+      servoY.write(outputY);
       if (currentX == 0) {
         changeState(S_SEARCHING);
       }
-
       break;
   }
 }
@@ -134,6 +128,7 @@ void readStringFromSerial() {
       newData = true;
     }
   }
+  Serial.println(receivedChars);
 }
 
 /**
@@ -148,6 +143,7 @@ String getValueFromSerial(String data, char separator, int index) {
   int found = 0;
   int strIndex[] = { 0, -1 };
   int maxIndex = data.length() - 1;
+  
 
   for (int i = 0; i <= maxIndex && found <= index; i++) {
     if (data.charAt(i) == separator || i == maxIndex) {
@@ -156,7 +152,9 @@ String getValueFromSerial(String data, char separator, int index) {
     }
   }
   strIndex[0] = strIndex[1] + 1;
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+
+  //return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+  return data;
 }
 
 /**
@@ -165,8 +163,10 @@ String getValueFromSerial(String data, char separator, int index) {
 */
 void updateCoordinates() {
   if (newData) {
-    coordinates[0] = getValueFromSerial(receivedChars, ",", 0).toInt();
-    coordinates[1] = getValueFromSerial(receivedChars, ",", 1).toInt();
+    String data = getValueFromSerial(receivedChars, ':', 0);
+    
+    coordinates[0] = data.substring(0, 4).toDouble();
+    coordinates[1] = data.substring(6, 10).toDouble();
   }
   newData = false;
 }
