@@ -5,6 +5,7 @@ class PID():
 
     def __init__(self, kp, ki, kd, direction):
         self.direction = direction
+        self.updateTime = 10
         self.setParams(kp, ki, kd)
         self.outputLast = 0.0
         self.outputSum = 0.0
@@ -12,6 +13,8 @@ class PID():
         self.outputLimitLow = 0.0
         self.outputLimitHigh = 0.0
         self.lastUpdateTime = self.millis()
+        self.outputValue = 90
+        
 
     
     @classmethod
@@ -20,23 +23,27 @@ class PID():
 
 
     def compute(self, actual, target):
-        lastError = self.error
-        self.error = target - actual
-        output = self.error * self.kp
-        self.outputSum += error * self.ki
-        self.outputLast = (lastError - error) * self.kd
-        outputValue = self.offset + output + outputSum + outputLast
-        if outputValue > self.outputLimitHigh:
-            outputValue = self.outputLimitHigh
-        if outputValue < self.outputLimitLow:
-            outputValue = self.outputLimitLow
+        if actual > 0:
+            lastError = self.error
+            self.error = target - actual
 
-        self.lastUpdateTime = self.millis()
+            output = self.error * self.kp
+            self.outputSum += self.error * self.ki
+            self.outputLast = (lastError - self.error) * self.kd
+            self.outputValue = self.offset + output + self.outputSum + self.outputLast
+            if self.outputValue > self.outputLimitHigh:
+                self.outputValue = self.outputLimitHigh
+            if self.outputValue < self.outputLimitLow:
+                self.outputValue = self.outputLimitLow
 
-        return outputValue
+            self.lastUpdateTime = self.millis()
+
+            return self.outputValue
+        else:
+            return self.outputValue
 
     def setParams(self, kp, ki, kd):
-        sampleTimeInSec = self.sampleTime / 1000
+        sampleTimeInSec = self.updateTime / 1000
         self.kp = kp
         self.ki = ki * sampleTimeInSec
         self.kd = kd * sampleTimeInSec

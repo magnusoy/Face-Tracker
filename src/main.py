@@ -9,16 +9,13 @@ Face Tracker main application
 from servo import Servo
 from eyes import Eyes
 from pid import PID
+from cv2 import waitKey
 
 # Create objects
 eyes = Eyes()
 servo = Servo()
-pidX = PID(kp=2.0, ki=0.0, kd=0.0, direction="DIRECT")
-pidY = PID(kp=2.0, ki=0.0, kd=0.0, direction="DIRECT")
-
-# Gloabl varibales
-offsetY = 80
-offsetX = 90
+pidX = PID(kp=0.1, ki=0.0, kd=0.07, direction="REVERSE")
+pidY = PID(kp=0.1, ki=0.0, kd=0.07, direction="REVERSE")
 
 
 def constrain(x, low, high):
@@ -34,24 +31,30 @@ def constrain(x, low, high):
     return y
 
 
-pidX.setUpdateTime(50)
-pidY.setUpdateTime(50)
+pidX.setUpdateTime(40)
+pidY.setUpdateTime(40)
 
 pidX.setOutputOffset(90)
 pidY.setOutputOffset(90)
 
 pidX.setOutputLimits(0, 180)
-pidX.setOutputLimits(50, 130)
+pidY.setOutputLimits(0, 180)
 
 # Main loop
 if __name__ == "__main__":
     while(True):
-        face_coordinates = eyes.detectFace()
+        face_coordinates = eyes.detectFace(True)
         x = face_coordinates[0]
         y = face_coordinates[1]
+        #print(face_coordinates)
 
-        outputX = pidX.compute(x, 320)
-        outputY = pidY.compute(y, 240)
-
+        outputX = pidX.compute(x, 302)
+        outputY = pidY.compute(y, 191)
+        #print((outputX, outputY))
         servo.turnXAxis(outputX)
         servo.turnYAxis(outputY)
+
+        key = waitKey(1)
+        if key == 27:  # exit on ESC
+            eyes.close()
+            break
