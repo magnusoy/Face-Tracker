@@ -9,11 +9,14 @@ Face Tracker main application
 from servo import Servo
 from eyes import Eyes
 from cv2 import waitKey
+import time
 
 # Create objects
 camera = Eyes()
 body = Servo()
 
+outX = 90
+outY = 90
 
 def constrain(x, low, high):
     """ Constrains the input to the lower
@@ -32,16 +35,23 @@ def translate(x, lowerIn, upperIn, lowerOut, upperOut):
     y = (x - lowerIn) / (upperIn - lowerIn) * (upperOut - lowerOut) + lowerOut
     return y
 
+def millis():
+        return int(round(time.time() * 1000))
+    
+lastCall = millis()
 # Main loop
 if __name__ == "__main__":
     while(True):
-        faceCoords = camera.detectFace()
+        faceCoords = camera.detectFace(False)
         x = faceCoords[0]
         y = faceCoords[1]
-
-        outX = translate(x, 0, 640, 0, 180)
-        outY = translate(y, 0, 480, 0, 180)
-
+        if x > 0:     
+            if millis() > lastCall:
+                outX = translate(x, 0, 640, 50, 120)
+                outY = translate(y, 0, 480, 70, 110)
+                lastCall = millis() + 1
+   
+            
         body.turnXAxis(outX)
         body.turnYAxis(outY)
         
