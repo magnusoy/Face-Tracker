@@ -1,8 +1,8 @@
 # Face Tracker
 
-This program utilize a Raspberry Pi and a Arduino for face tracking.
+This program utilize a Raspberry Pi face/object tracking.
 
-It does so by using the Raspi-Cam for face detection and two servoes for moving in the x and y plane.
+It does so by using the Raspi-Cam for face/object detection and two servoes for moving in the x and y plane.
 
 
 ## Installing
@@ -38,33 +38,42 @@ Once your Raspberry is up and running.
 
 ## Setup
 
-Use Arduino IDE to flash the bot.ino script over too the Arduino board.
+Only nessecary for object tracking. Since its based on HSV settings.
 
-Finally plug the USB to the Raspberry and find the connected port.
-
-Then change the port in the Python script.
 
 ```bash
    cd ~
-   sudo nano Face-Tracker/src/app.py
+   cd Face-Tracker/src/
+   python3 morphological_transformation.py
 ```
-Press CTRL + O and then ENTER to save.
+Change the slideres until you have successfully isolated your object with white space
 
-Press CTRL + X to close.
+in the dilation frame.
+
+Write down the numbers, and change the self.lower_color and self.upper_color lists in
+
+the color_tracking.py file.
+
 
 ## Usage
 
 ```bash
    cd ~
-   cd Face-Tracker/
-   sh run.sh
+   cd Face-Tracker/src/
+   python3 app.py
+```
+or 
+
+```bash
+   cd ~
+   cd Face-Tracker/src/
+   python3 app_color.py
 ```
 
 
 ## Built With
 
 * [Python](https://www.python.org/) - Python
-* [Arduino](https://www.arduino.cc/) - Arduino
 
 
 ## Contributing
@@ -87,3 +96,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](https://gi
 [Pyserial](https://pythonhosted.org/pyserial/)
 
 [OpenCV](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_tutorials.html)
+
+[Adafruit Servokit](https://circuitpython.readthedocs.io/projects/servokit/en/latest/)

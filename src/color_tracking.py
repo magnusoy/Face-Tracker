@@ -15,14 +15,13 @@ import cv2
 import numpy as np
 
 
-class BallTracking(object):
+class ObjectTracker(object):
     """Finds biggest object according to HSV filtering.
     Returns the coordinates in x and y plane."""
+
     def __init__(self, capture, watch):
         self.frame = watch
         self.cap = capture
-        #self.lower_color = np.array([64, 69, 0])
-        #self.upper_color = np.array([149, 255, 255])
         self.lower_color = np.array([0, 89, 74])
         self.upper_color = np.array([179, 255, 255])
 
@@ -30,10 +29,6 @@ class BallTracking(object):
         """Finds the biggest object.
         Return: X and Y coordinates from center of the object"""
         _, frame = self.cap.read()
-
-        # Scale down frame to fit platform dimension
-        #roi = frame[0: 465, 94: 530]
-        #frame = cv2.bitwise_and(roi, roi)
 
         # Convert RGB to HSV
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -46,7 +41,8 @@ class BallTracking(object):
         dilation = cv2.dilate(mask, kernel)
 
         # Finding the contours
-        im2, contours, hierarchy = cv2.findContours(dilation, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        im2, contours, hierarchy = cv2.findContours(
+            dilation, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Mark up only the largest contour and draw centroid
         if len(contours) > 0:
@@ -85,13 +81,13 @@ class BallTracking(object):
 # Simple example of usage.
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
-    ballTracking = BallTracking(cap, watch=True)
+    tracker = ObjectTracker(cap, watch=True)
 
     while True:
-        coordinates = ballTracking.getCoordinates()
+        coordinates = tracker.getCoordinates()
         print(coordinates)
         # Break loop with ESC-key
         key = cv2.waitKey(5) & 0xFF
         if key == 27:
-            ballTracking.stop()
+            tracker.stop()
             break

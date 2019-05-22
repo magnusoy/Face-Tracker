@@ -28,7 +28,8 @@ class Eyes(object):
         if len(faces) > 0:
             face = faces[0]
             center = (face[0] + (0.5*face[2]), face[1] + (0.5*face[3]))
-            cv2.circle(gray, (int(center[0]), int(center[1])), 5, (0, 0, 255), -3)
+            cv2.circle(gray, (int(center[0]), int(
+                center[1])), 5, (0, 0, 255), -3)
         if showFrame:
             cv2.imshow("Preview", gray)
         return center
